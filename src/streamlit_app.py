@@ -10,18 +10,12 @@ os.environ["HF_HOME"] = "/app/.cache/huggingface"
 os.environ["TORCH_HOME"] = "/app/.cache/torch"
 hf_token = os.getenv("HateSpeechMujtabatoken")
 
-import torch
-import torchaudio
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
-import streamlit as st
-
-whisper_processor = WhisperProcessor.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain")
+whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-small")
 whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
 text_model = AutoModelForSequenceClassification.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain")
 tokenizer = AutoTokenizer.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain")
 
-label_map = {0: "Not Hate Speech", 1: "Hate Speech"}
+label_map = {0: "Not Hate Speech", 1: "Hate Speech", 2: "Hate Speech"}
 
 def transcribe(audio_path):
     waveform, sample_rate = torchaudio.load(audio_path)
@@ -44,11 +38,10 @@ def predict_hate_speech(audio_path=None, text=None):
         text_input = text
     else:
         return "No input provided"
-
     prediction = extract_text_features(text_input)
     return prediction
 
-st.title("Hate Speech Detector with Audio and Text")
+st.title("Hate Speech Detector")
 audio_file = st.file_uploader("Upload an audio file", type=["wav", "mp3", "flac", "ogg", "opus"])
 text_input = st.text_input("Optional text input")
 if st.button("Predict"):
