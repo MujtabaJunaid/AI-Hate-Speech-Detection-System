@@ -12,8 +12,8 @@ os.environ["HF_TOKEN"] = "your_huggingface_access_token"
 
 whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny", use_auth_token=True)
 whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny", use_auth_token=True)
-text_model = AutoModelForSequenceClassification.from_pretrained("GroNLP/hateBERT")
-tokenizer = AutoTokenizer.from_pretrained("GroNLP/hateBERT")
+text_model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
 def transcribe(audio_path):
     waveform, sample_rate = torchaudio.load(audio_path)
