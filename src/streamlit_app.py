@@ -1,3 +1,8 @@
+import os
+os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
+os.environ["HF_HOME"] = "/app/.cache/huggingface"
+os.environ["XDG_CACHE_HOME"] = "/app/.cache"
+os.environ["XDG_CONFIG_HOME"] = "/app/.streamlit"
 import torch
 import torchaudio
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
