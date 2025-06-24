@@ -2,6 +2,7 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -10,10 +11,15 @@ RUN apt-get update && apt-get install -y \
     libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
+# Create a writable cache directory
+RUN mkdir -p /app/.cache && chmod -R 777 /app/.cache
+
+ENV TRANSFORMERS_CACHE=/app/.cache/huggingface
+ENV HF_HOME=/app/.cache/huggingface
+ENV TORCH_HOME=/app/.cache/torch
+
 COPY requirements.txt ./
 COPY src/ ./src/
-
-RUN mkdir -p /app/.cache && chmod -R 777 /app/.cache
 
 RUN pip install --no-cache-dir -r requirements.txt
 
