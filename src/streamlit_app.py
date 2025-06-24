@@ -4,10 +4,15 @@ from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import streamlit as st
 
-text_model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
-tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
-whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny")
+@st.cache_resource
+def load_models():
+    whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
+    whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny")
+    text_model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    return whisper_processor, whisper_model, text_model, tokenizer
+
+whisper_processor, whisper_model, text_model, tokenizer = load_models()
 
 def transcribe(audio_path):
     waveform, sample_rate = torchaudio.load(audio_path)
