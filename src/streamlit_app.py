@@ -8,9 +8,9 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
 os.environ["HF_HOME"] = "/app/.cache/huggingface"
 os.environ["TORCH_HOME"] = "/app/.cache/torch"
-os.environ["HF_TOKEN"] = st.secrets["HF_TOKEN"]
+os.environ["HF_TOKEN"] = st.secrets["Hf_token"]
 
-hf_token = st.secrets["HF_TOKEN"]
+hf_token = st.secrets["Hf_token"]
 
 whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny", token=hf_token)
 whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny", token=hf_token)
