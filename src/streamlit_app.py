@@ -1,40 +1,40 @@
-import altair as alt
-import numpy as np
-import pandas as pd
+import torch
+import torchaudio
+from transformers import WhisperProcessor, WhisperForConditionalGeneration
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import streamlit as st
 
-"""
-# Welcome to Streamlit!
+text_model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
+whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny")
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+def transcribe(audio_path):
+    waveform, sample_rate = torchaudio.load(audio_path)
+    input_features = whisper_processor(waveform.squeeze().numpy(), sampling_rate=sample_rate, return_tensors="pt").input_features
+    predicted_ids = whisper_model.generate(input_features)
+    transcription = whisper_processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
+    return transcription
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+def extract_text_features(text):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    outputs = text_model(**inputs)
+    return outputs.logits.argmax(dim=1).item()
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+def predict_hate_speech(audio_path, text):
+    transcription = transcribe(audio_path)
+    text_input = text if text else transcription
+    prediction = extract_text_features(text_input)
+    return "Hate Speech" if prediction == 1 else "Not Hate Speech"
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
-
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
-
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
-
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+st.title("Hate Speech Detector with Audio and Text")
+audio_file = st.file_uploader("Upload an audio file", type=["wav", "mp3", "flac"])
+text_input = st.text_input("Optional text input")
+if st.button("Predict"):
+    if audio_file is not None:
+        with open("temp_audio.wav", "wb") as f:
+            f.write(audio_file.read())
+        prediction = predict_hate_speech("temp_audio.wav", text_input)
+        st.success(prediction)
+    else:
+        st.warning("Please upload an audio file.")
