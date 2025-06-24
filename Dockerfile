@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
 
+RUN mkdir -p /app/.cache/huggingface && chmod -R 777 /app/.cache
+
 RUN chmod -R 755 /app/src
 
 EXPOSE 8501
