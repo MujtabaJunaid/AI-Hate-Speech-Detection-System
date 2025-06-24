@@ -5,6 +5,8 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import streamlit as st
 import os
 os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
+os.environ["HF_HOME"] = "/app/.cache/huggingface"
+
 
 
 @st.cache_resource
