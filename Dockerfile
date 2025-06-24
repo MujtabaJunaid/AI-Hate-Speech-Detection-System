@@ -2,7 +2,6 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# System dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -11,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create writable cache directory
 RUN mkdir -p /app/.cache && chmod -R 777 /app/.cache
 
 ENV TRANSFORMERS_CACHE=/app/.cache/huggingface
