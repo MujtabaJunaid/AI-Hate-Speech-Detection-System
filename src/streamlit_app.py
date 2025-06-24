@@ -12,8 +12,8 @@ hf_token = os.getenv("HateSpeechMujtabatoken")
 
 whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny", token=hf_token)
 whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny", token=hf_token)
-text_model = AutoModelForSequenceClassification.from_pretrained("GroNLP/hateBERT", token=hf_token)
-tokenizer = AutoTokenizer.from_pretrained("GroNLP/hateBERT", token=hf_token)
+text_model = AutoModelForSequenceClassification.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain", token=hf_token)
+tokenizer = AutoTokenizer.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain", token=hf_token)
 
 def transcribe(audio_path):
     waveform, sample_rate = torchaudio.load(audio_path)
