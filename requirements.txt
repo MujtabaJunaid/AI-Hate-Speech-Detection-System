@@ -1,7 +1,8 @@
 altair
 pandas
 streamlit
-torch
-torchaudio
-transformers
-streamlit
+torch==2.1.2
+torchaudio==2.1.2
+transformers==4.39.3
+streamlit==1.34.0
+
