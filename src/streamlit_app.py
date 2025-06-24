@@ -3,6 +3,9 @@ import torchaudio
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import streamlit as st
+import os
+os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
+
 
 @st.cache_resource
 def load_models():
