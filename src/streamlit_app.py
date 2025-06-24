@@ -1,9 +1,8 @@
 import torch
-import torchaudio
 import os
 import streamlit as st
-import sounddevice as sd
-import soundfile as sf
+from pydub import AudioSegment
+import numpy as np
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
@@ -17,14 +16,11 @@ whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-
 text_model = AutoModelForSequenceClassification.from_pretrained("GroNLP/hateBERT", token=hf_token)
 tokenizer = AutoTokenizer.from_pretrained("GroNLP/hateBERT", token=hf_token)
 
-def record_audio(duration, filename, samplerate=16000):
-    recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='float32')
-    sd.wait()
-    sf.write(filename, recording, samplerate)
-
 def transcribe(audio_path):
-    waveform, sample_rate = torchaudio.load(audio_path)
-    input_features = whisper_processor(waveform.squeeze().numpy(), sampling_rate=sample_rate, return_tensors="pt").input_features
+    audio = AudioSegment.from_file(audio_path, format="opus")
+    audio = audio.set_channels(1).set_frame_rate(16000)
+    samples = np.array(audio.get_array_of_samples()).astype(np.float32) / (2**15)
+    input_features = whisper_processor(samples, sampling_rate=16000, return_tensors="pt").input_features
     predicted_ids = whisper_model.generate(input_features)
     transcription = whisper_processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
     return transcription
@@ -36,8 +32,7 @@ def extract_text_features(text):
     return "Hate Speech" if predicted_class >= 1 else "Not Hate Speech"
 
 def predict(text_input):
-    audio_path = "mic_input.wav"
-    record_audio(5, audio_path)
+    audio_path = "input.opus"
     transcribed_text = transcribe(audio_path)
     prediction = extract_text_features(text_input or transcribed_text)
     if text_input:
@@ -47,6 +42,6 @@ def predict(text_input):
 
 st.title("Hate Speech Detector")
 text_input = st.text_input("Enter text (optional):")
-if st.button("Start Recording and Predict"):
+if st.button("Run Prediction"):
     result = predict(text_input)
     st.success(result)
