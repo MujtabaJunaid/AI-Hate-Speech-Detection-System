@@ -1,11 +1,13 @@
+import os
+
+os.environ["TRANSFORMERS_CACHE"] = "/app/.cache"
+os.environ["HF_HOME"] = "/app/.cache"
 import torch
 import torchaudio
-import os
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import streamlit as st
-os.environ["TRANSFORMERS_CACHE"] = "/app/.cache"
-os.environ["HF_HOME"] = "/app/.cache"
+
 
 def load_models():
     whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
