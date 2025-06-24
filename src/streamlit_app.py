@@ -3,16 +3,12 @@ os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
 os.environ["HF_HOME"] = "/app/.cache/huggingface"
 os.environ["XDG_CACHE_HOME"] = "/app/.cache"
 os.environ["XDG_CONFIG_HOME"] = "/app/.streamlit"
+
 import torch
 import torchaudio
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import streamlit as st
-import os
-os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
-os.environ["HF_HOME"] = "/app/.cache/huggingface"
-
-
 
 @st.cache_resource
 def load_models():
@@ -36,20 +32,30 @@ def extract_text_features(text):
     outputs = text_model(**inputs)
     return outputs.logits.argmax(dim=1).item()
 
-def predict_hate_speech(audio_path, text):
-    transcription = transcribe(audio_path)
-    text_input = text if text else transcription
+def predict_hate_speech(audio_path=None, text=None):
+    if text:
+        text_input = text
+    elif audio_path:
+        transcription = transcribe(audio_path)
+        text_input = transcription
+    else:
+        return "Please provide either audio or text input."
+
     prediction = extract_text_features(text_input)
     return "Hate Speech" if prediction == 1 else "Not Hate Speech"
 
 st.title("Hate Speech Detector with Audio and Text")
-audio_file = st.file_uploader("Upload an audio file", type=["wav", "mp3", "flac"])
+audio_file = st.file_uploader("Upload an audio file (wav, mp3, flac, ogg, opus)", type=["wav", "mp3", "flac", "ogg", "opus"])
 text_input = st.text_input("Optional text input")
+
 if st.button("Predict"):
     if audio_file is not None:
-        with open("temp_audio.wav", "wb") as f:
+        with open("temp_audio", "wb") as f:
             f.write(audio_file.read())
-        prediction = predict_hate_speech("temp_audio.wav", text_input)
+        prediction = predict_hate_speech("temp_audio", text_input)
+        st.success(prediction)
+    elif text_input:
+        prediction = predict_hate_speech(text=text_input)
         st.success(prediction)
     else:
-        st.warning("Please upload an audio file.")
+        st.warning("Please provide at least audio or text input.")
