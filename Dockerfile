@@ -16,7 +16,6 @@ ENV TORCH_HOME=/app/.cache/torch
 
 COPY requirements.txt ./
 COPY src/ ./src/
-COPY input.opus ./input.opus
 
 RUN pip install --no-cache-dir -r requirements.txt
 
