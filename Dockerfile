@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt ./
 COPY src/ ./src/
 
+RUN mkdir /app/cache && chmod 777 /app/cache
+ENV TRANSFORMERS_CACHE=/app/cache
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
