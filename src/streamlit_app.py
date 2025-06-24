@@ -1,7 +1,4 @@
-import os
 
-os.environ["TRANSFORMERS_CACHE"] = "/app/.cache"
-os.environ["HF_HOME"] = "/app/.cache"
 import os
 import torch
 import torchaudio
