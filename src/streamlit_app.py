@@ -1,19 +1,21 @@
 import torch
 import torchaudio
 import os
+import streamlit as st
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import streamlit as st
 
 os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
 os.environ["HF_HOME"] = "/app/.cache/huggingface"
 os.environ["TORCH_HOME"] = "/app/.cache/torch"
-os.environ["HF_TOKEN"] = "your_huggingface_access_token"
+os.environ["HF_TOKEN"] = st.secrets["HF_TOKEN"]
 
-whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny", use_auth_token=True)
-whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny", use_auth_token=True)
-text_model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
-tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+hf_token = st.secrets["HF_TOKEN"]
+
+whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny", token=hf_token)
+whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny", token=hf_token)
+text_model = AutoModelForSequenceClassification.from_pretrained("GroNLP/hateBERT", token=hf_token)
+tokenizer = AutoTokenizer.from_pretrained("GroNLP/hateBERT", token=hf_token)
 
 def transcribe(audio_path):
     waveform, sample_rate = torchaudio.load(audio_path)
