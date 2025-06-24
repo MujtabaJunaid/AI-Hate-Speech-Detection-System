@@ -4,10 +4,10 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     build-essential \
-    curl \
-    git \
     ffmpeg \
     libsndfile1 \
+    libasound2-dev \
+    portaudio19-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app/.cache && chmod -R 777 /app/.cache
