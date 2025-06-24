@@ -3,18 +3,10 @@ FROM python:3.9-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    git \
     ffmpeg \
     libsndfile1 \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /app/.cache && chmod -R 777 /app/.cache
-
-ENV TRANSFORMERS_CACHE=/app/.cache/huggingface
-ENV HF_HOME=/app/.cache/huggingface
-ENV TORCH_HOME=/app/.cache/torch
+    git \
+    curl && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
 COPY src/ ./src/
