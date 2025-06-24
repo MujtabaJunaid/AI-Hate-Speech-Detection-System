@@ -1,4 +1,3 @@
-
 import os
 import torch
 import torchaudio
@@ -6,6 +5,9 @@ import tempfile
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import streamlit as st
+
+os.environ["TRANSFORMERS_CACHE"] = "/app/cache"
+os.makedirs("/app/cache", exist_ok=True)
 
 whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
 whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny")
@@ -28,25 +30,4 @@ def extract_text_features(text):
     outputs = text_model(**inputs)
     return outputs.logits.argmax(dim=1).item()
 
-def predict_hate_speech(audio_bytes, text):
-    if audio_bytes:
-        transcription = transcribe(audio_bytes)
-        text_input = text if text else transcription
-    elif text:
-        text_input = text
-    else:
-        return "Please provide audio or text"
-    prediction = extract_text_features(text_input)
-    return "Hate Speech" if prediction == 1 else "Not Hate Speech"
-
-st.title("Hate Speech Detection")
-audio_file = st.file_uploader("Upload audio file", type=["wav", "mp3", "flac", "ogg", "opus"])
-text_input = st.text_input("Or enter text")
-
-if st.button("Predict"):
-    if audio_file is not None or text_input:
-        audio_bytes = audio_file.read() if audio_file else None
-        result = predict_hate_speech(audio_bytes, text_input)
-        st.success(result)
-    else:
-        st.warning("Please provide either audio or text input")
+def predict
