@@ -9,7 +9,7 @@ os.environ["TRANSFORMERS_CACHE"] = "/app/.cache/huggingface"
 os.environ["HF_HOME"] = "/app/.cache/huggingface"
 os.environ["TORCH_HOME"] = "/app/.cache/torch"
 
-hf_token = st.secrets["Hf_token"]
+hf_token = st.secrets["HateSpeechMujtabatoken"]
 
 whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny", token=hf_token)
 whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny", token=hf_token)
