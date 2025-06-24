@@ -6,8 +6,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     ffmpeg \
     libsndfile1 \
-    libasound2-dev \
-    portaudio19-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app/.cache && chmod -R 777 /app/.cache
@@ -18,6 +16,7 @@ ENV TORCH_HOME=/app/.cache/torch
 
 COPY requirements.txt ./
 COPY src/ ./src/
+COPY input.opus ./input.opus
 
 RUN pip install --no-cache-dir -r requirements.txt
 
