@@ -2,6 +2,8 @@ import torch
 import torchaudio
 import os
 import streamlit as st
+import sounddevice as sd
+import soundfile as sf
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
@@ -10,12 +12,15 @@ os.environ["HF_HOME"] = "/app/.cache/huggingface"
 os.environ["TORCH_HOME"] = "/app/.cache/torch"
 hf_token = os.getenv("HateSpeechMujtabatoken")
 
-whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-small")
-whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
-text_model = AutoModelForSequenceClassification.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain")
-tokenizer = AutoTokenizer.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain")
+whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-tiny", token=hf_token)
+whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny", token=hf_token)
+text_model = AutoModelForSequenceClassification.from_pretrained("GroNLP/hateBERT", token=hf_token)
+tokenizer = AutoTokenizer.from_pretrained("GroNLP/hateBERT", token=hf_token)
 
-label_map = {0: "Not Hate Speech", 1: "Hate Speech", 2: "Hate Speech"}
+def record_audio(duration, filename, samplerate=16000):
+    recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='float32')
+    sd.wait()
+    sf.write(filename, recording, samplerate)
 
 def transcribe(audio_path):
     waveform, sample_rate = torchaudio.load(audio_path)
@@ -25,33 +30,23 @@ def transcribe(audio_path):
     return transcription
 
 def extract_text_features(text):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     outputs = text_model(**inputs)
-    pred_label = outputs.logits.argmax(dim=1).item()
-    return label_map.get(pred_label, "Unknown")
+    predicted_class = outputs.logits.argmax(dim=1).item()
+    return "Hate Speech" if predicted_class >= 1 else "Not Hate Speech"
 
-def predict_hate_speech(audio_path=None, text=None):
-    if audio_path:
-        transcription = transcribe(audio_path)
-        text_input = text if text else transcription
-    elif text:
-        text_input = text
+def predict(text_input):
+    audio_path = "mic_input.wav"
+    record_audio(5, audio_path)
+    transcribed_text = transcribe(audio_path)
+    prediction = extract_text_features(text_input or transcribed_text)
+    if text_input:
+        return f"Predicted: {prediction}"
     else:
-        return "No input provided"
-    prediction = extract_text_features(text_input)
-    return prediction
+        return f"Predicted: {prediction} \n\n(Transcribed: {transcribed_text})"
 
 st.title("Hate Speech Detector")
-audio_file = st.file_uploader("Upload an audio file", type=["wav", "mp3", "flac", "ogg", "opus"])
-text_input = st.text_input("Optional text input")
-if st.button("Predict"):
-    if audio_file is not None:
-        with open("temp_audio.wav", "wb") as f:
-            f.write(audio_file.read())
-        prediction = predict_hate_speech("temp_audio.wav", text_input)
-        st.success(prediction)
-    elif text_input:
-        prediction = predict_hate_speech(text=text_input)
-        st.success(prediction)
-    else:
-        st.warning("Please upload an audio file or enter text.")
+text_input = st.text_input("Enter text (optional):")
+if st.button("Start Recording and Predict"):
+    result = predict(text_input)
+    st.success(result)
